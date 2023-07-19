@@ -1,3 +1,6 @@
+import { allPass, compose, equals, prop } from "ramda";
+import { COLORS, SHAPES } from "../constants";
+
 /**
  * @file Домашка по FP ч. 1
  *
@@ -12,15 +15,31 @@
  *
  * Если какие либо функции написаны руками (без использования библиотек) это не является ошибкой
  */
+const isWhite = equals(COLORS.WHITE);
+const isRed = equals(COLORS.RED);
+const isGreen = equals(COLORS.GREEN);
+// const isBlue = equals(COLORS.BLUE);
+// const isOrange = equals(COLORS.ORANGE);
+
+const getCircle = prop(SHAPES.CIRCLE);
+const getSquare = prop(SHAPES.SQUARE);
+const getTriangle = prop(SHAPES.TRIANGLE);
+const getStar = prop(SHAPES.STAR);
+
+const isCircleWhite = compose(isWhite, getCircle);
+const isSquareGreen = compose(isGreen, getSquare);
+const isTriangleWhite = compose(isWhite, getTriangle);
+const isStarRed = compose(isRed, getStar);
+
+// Фигуры на странице всегда в таком порядке: Circle Square Triangle Star
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
-export const validateFieldN1 = ({star, square, triangle, circle}) => {
-    if (triangle !== 'white' || circle !== 'white') {
-        return false;
-    }
-
-    return star === 'red' && square === 'green';
-};
+export const validateFieldN1 = allPass([
+  isCircleWhite,
+  isSquareGreen,
+  isTriangleWhite,
+  isStarRed,
+]);
 
 // 2. Как минимум две фигуры зеленые.
 export const validateFieldN2 = () => false;
