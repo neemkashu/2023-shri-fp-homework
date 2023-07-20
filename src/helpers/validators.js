@@ -4,9 +4,11 @@ import {
   allPass,
   anyPass,
   compose,
+  converge,
   equals,
   filter,
   gte,
+  juxt,
   keys,
   length,
   map,
@@ -80,10 +82,7 @@ export const validateFieldN2 = compose(
 const redAmount = compose(objectSize, filter(isRed));
 const blueAmount = compose(objectSize, filter(isBlue));
 
-const redAndBlueAmounts = (arg) =>
-  map((fun) => fun(arg), [redAmount, blueAmount]);
-
-export const validateFieldN3 = compose(is1, length, uniq, redAndBlueAmounts);
+export const validateFieldN3 = converge(equals, [redAmount, blueAmount]);
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
 export const validateFieldN4 = () => false;
