@@ -11,7 +11,9 @@ import {
   juxt,
   keys,
   length,
+  lte,
   map,
+  not,
   prop,
   uniq,
   useWith,
@@ -38,9 +40,7 @@ const isWhite = equals(COLORS.WHITE);
 const isRed = equals(COLORS.RED);
 const isGreen = equals(COLORS.GREEN);
 const isBlue = equals(COLORS.BLUE);
-// const isOrange = equals(COLORS.ORANGE);
-
-const is1 = equals(1);
+const isOrange = equals(COLORS.ORANGE);
 
 const getCircle = prop(SHAPES.CIRCLE);
 const getSquare = prop(SHAPES.SQUARE);
@@ -85,13 +85,34 @@ const blueAmount = compose(objectSize, filter(isBlue));
 export const validateFieldN3 = converge(equals, [redAmount, blueAmount]);
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
-export const validateFieldN4 = () => false;
+export const validateFieldN4 = allPass([
+  compose(isBlue, getCircle),
+  compose(isRed, getStar),
+  compose(isOrange, getSquare),
+]);
 
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
-export const validateFieldN5 = () => false;
+const isNotWhite = compose(not, isWhite);
+const greaterOrEqualTo3 = gte(__, 3);
+
+export const validateFieldN5 = compose(
+  greaterOrEqualTo3,
+  objectSize,
+  filter(isNotWhite)
+);
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
-export const validateFieldN6 = () => false;
+const is1 = equals(1);
+const is2 = equals(2);
+
+const twoGreenShapes = compose(is2, objectSize, filter(isGreen));
+const oneRedShape = compose(is1, objectSize, filter(isRed));
+
+export const validateFieldN6 = allPass([
+  twoGreenShapes,
+  isTriangleGreen,
+  oneRedShape,
+]);
 
 // 7. Все фигуры оранжевые.
 export const validateFieldN7 = () => false;
