@@ -1,6 +1,6 @@
 import { COLORS, SHAPES } from "../constants";
 import * as validatorsFunctional from "./validators";
-import * as validatorsImperative from "./validatorsImperative";
+import * as validatorsReference from "./validatorsReference";
 
 import "lodash.multipermutations";
 import _ from "lodash";
@@ -37,7 +37,7 @@ for (let i = 0; i < cases.length; i++) {
   test(testName, () => {
     for (let colors of colorsPermutations) {
       const shapes = paintShapes(colors);
-      expect(validatorsImperative[functionName](shapes)).toBe(
+      expect(validatorsReference[functionName](shapes)).toBe(
         validatorsFunctional[functionName](shapes)
       );
     }
