@@ -115,7 +115,9 @@ export const validateFieldN6 = allPass([
 ]);
 
 // 7. Все фигуры оранжевые.
-export const validateFieldN7 = () => false;
+const is4 = equals(4);
+
+export const validateFieldN7 = compose(is4, objectSize, filter(isOrange));
 
 // 8. Не красная и не белая звезда, остальные – любого цвета.
 export const validateFieldN8 = () => false;
