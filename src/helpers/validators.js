@@ -120,10 +120,20 @@ const is4 = equals(4);
 export const validateFieldN7 = compose(is4, objectSize, filter(isOrange));
 
 // 8. Не красная и не белая звезда, остальные – любого цвета.
-export const validateFieldN8 = () => false;
+export const validateFieldN8 = allPass([
+  compose(not, isWhite, getStar),
+  compose(not, isRed, getStar),
+]);
 
 // 9. Все фигуры зеленые.
-export const validateFieldN9 = () => false;
+export const validateFieldN9 = compose(is4, objectSize, filter(isGreen));
 
 // 10. Треугольник и квадрат одного цвета (не белого), остальные – любого цвета
-export const validateFieldN10 = () => false;
+
+const isTriangleEqualSquare = converge(equals, [getTriangle, getSquare]);
+
+export const validateFieldN10 = allPass([
+  compose(not, isWhite, getTriangle),
+  compose(not, isWhite, getSquare),
+  isTriangleEqualSquare,
+]);
