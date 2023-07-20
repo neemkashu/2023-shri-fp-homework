@@ -37,6 +37,12 @@ for (let i = 0; i < cases.length; i++) {
   test(testName, () => {
     for (let colors of colorsPermutations) {
       const shapes = paintShapes(colors);
+      if (
+        validatorsReference[functionName](shapes) !==
+        validatorsFunctional[functionName](shapes)
+      ) {
+        console.log(functionName, shapes);
+      }
       expect(validatorsReference[functionName](shapes)).toBe(
         validatorsFunctional[functionName](shapes)
       );
