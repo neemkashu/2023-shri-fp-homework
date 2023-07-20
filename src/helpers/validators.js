@@ -1,4 +1,17 @@
-import { allPass, compose, equals, prop } from "ramda";
+/* eslint-disable no-unused-vars */
+import {
+  __,
+  allPass,
+  anyPass,
+  compose,
+  equals,
+  filter,
+  gte,
+  keys,
+  length,
+  map,
+  prop,
+} from "ramda";
 import { COLORS, SHAPES } from "../constants";
 
 /**
@@ -27,11 +40,17 @@ const getTriangle = prop(SHAPES.TRIANGLE);
 const getStar = prop(SHAPES.STAR);
 
 const isCircleWhite = compose(isWhite, getCircle);
+const isCircleGreen = compose(isGreen, getCircle);
 const isSquareGreen = compose(isGreen, getSquare);
 const isTriangleWhite = compose(isWhite, getTriangle);
+const isTriangleGreen = compose(isGreen, getTriangle);
 const isStarRed = compose(isRed, getStar);
+const isStarGreen = compose(isGreen, getStar);
 
 // Фигуры на странице всегда в таком порядке: Circle Square Triangle Star
+// export const validateFieldN1 = ({star, square, triangle, circle}) => {
+// ...
+// };
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
 export const validateFieldN1 = allPass([
@@ -42,7 +61,15 @@ export const validateFieldN1 = allPass([
 ]);
 
 // 2. Как минимум две фигуры зеленые.
-export const validateFieldN2 = () => false;
+
+const isGreaterThanOne = gte(__, 2);
+
+export const validateFieldN2 = compose(
+  isGreaterThanOne,
+  length,
+  keys,
+  filter(isGreen)
+);
 
 // 3. Количество красных фигур равно кол-ву синих.
 export const validateFieldN3 = () => false;
