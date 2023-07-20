@@ -11,6 +11,8 @@ import {
   length,
   map,
   prop,
+  uniq,
+  useWith,
 } from "ramda";
 import { COLORS, SHAPES } from "../constants";
 
@@ -28,11 +30,15 @@ import { COLORS, SHAPES } from "../constants";
  *
  * Если какие либо функции написаны руками (без использования библиотек) это не является ошибкой
  */
+const objectSize = compose(length, keys);
+
 const isWhite = equals(COLORS.WHITE);
 const isRed = equals(COLORS.RED);
 const isGreen = equals(COLORS.GREEN);
-// const isBlue = equals(COLORS.BLUE);
+const isBlue = equals(COLORS.BLUE);
 // const isOrange = equals(COLORS.ORANGE);
+
+const is1 = equals(1);
 
 const getCircle = prop(SHAPES.CIRCLE);
 const getSquare = prop(SHAPES.SQUARE);
@@ -66,13 +72,18 @@ const isGreaterThanOne = gte(__, 2);
 
 export const validateFieldN2 = compose(
   isGreaterThanOne,
-  length,
-  keys,
+  objectSize,
   filter(isGreen)
 );
 
 // 3. Количество красных фигур равно кол-ву синих.
-export const validateFieldN3 = () => false;
+const redAmount = compose(objectSize, filter(isRed));
+const blueAmount = compose(objectSize, filter(isBlue));
+
+const redAndBlueAmounts = (arg) =>
+  map((fun) => fun(arg), [redAmount, blueAmount]);
+
+export const validateFieldN3 = compose(is1, length, uniq, redAndBlueAmounts);
 
 // 4. Синий круг, красная звезда, оранжевый квадрат треугольник любого цвета
 export const validateFieldN4 = () => false;
