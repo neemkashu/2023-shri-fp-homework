@@ -5,6 +5,7 @@ import {
   anyPass,
   compose,
   converge,
+  count,
   equals,
   filter,
   gte,
@@ -17,6 +18,7 @@ import {
   prop,
   uniq,
   useWith,
+  values,
 } from "ramda";
 import { COLORS, SHAPES } from "../constants";
 
@@ -105,7 +107,10 @@ export const validateFieldN5 = compose(
 const is1 = equals(1);
 const is2 = equals(2);
 
-const twoGreenShapes = compose(is2, objectSize, filter(isGreen));
+// const colorCount = (isColor) => compose(objectSize, filter(isColor));
+
+const twoGreenShapes = compose(is2, count(isGreen), values);
+// const twoGreenShapes = compose(is2, objectSize, filter(isGreen));
 const oneRedShape = compose(is1, objectSize, filter(isRed));
 
 export const validateFieldN6 = allPass([
