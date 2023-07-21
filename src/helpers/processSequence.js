@@ -1,7 +1,11 @@
 import {
   __,
   allPass,
+  always,
+  andThen,
+  applySpec,
   compose,
+  concat,
   count,
   curry,
   curryN,
@@ -13,6 +17,9 @@ import {
   lt,
   lte,
   not,
+  otherwise,
+  partial,
+  prop,
   split,
   tap,
   test,
@@ -40,7 +47,14 @@ import Api from "../tools/api";
 число должно быть положительным
 символы в строке только [0-9] и точка т.е. число в 10-ной системе счисления (возможно с плавающей запятой)
 В случае ошибки валидации вызвать handleError с 'ValidationError' строкой в качестве аргумента
- */
+//  */
+// Привести строку к числу, округлить к ближайшему целому с точностью до единицы, записать в writeLog.
+// C помощью API /numbers/base перевести из 10-й системы счисления в двоичную, результат записать в writeLog
+// Взять кол-во символов в полученном от API числе записать в writeLog
+// Возвести в квадрат с помощью Javascript записать в writeLog
+// Взять остаток от деления на 3, записать в writeLog
+// C помощью API /animals.tech/id/name получить случайное животное используя полученный остаток в качестве id
+// Завершить цепочку вызовом handleSuccess в который в качестве аргумента положить результат полученный на предыдущем шаге
 
 const api = new Api();
 const splitOnChars = split("");
@@ -59,16 +73,49 @@ const isValidNumber = allPass([
   isLonlyDot,
   isDigitsAndDot,
 ]);
+const roundToInteger = curry(Math.round);
+const makeParams = applySpec({
+  number: (x) => x,
+  from: always(10),
+  to: always(2),
+});
+const toString = (x) => `${x}`;
+const fetchApi = api.get("https://api.tech/numbers/base");
+const animalUrl = concat("https://animals.tech/");
+const fetchAnimal = compose(api.get(__, {}), animalUrl, toString);
+const getConverted = prop("result");
+const size = prop("length");
+const square = curry(Math.pow)(__, 2);
+const remainderBy3 = (x) => x % 3;
 
 const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   writeLog(value);
+  const logger = tap(writeLog);
   const curriedHandleError = curryN(2, handleError);
+  const getAnimal = compose(
+    andThen(compose(logger, getConverted)),
+    otherwise(curry(handleError)),
+    fetchAnimal,
+    logger,
+    remainderBy3,
+    square,
+    logger,
+    size,
+    logger,
+    getConverted
+  );
 
-  ifElse(
-    isValidNumber,
-    curry(parseFloat),
-    curriedHandleError("ValidationError")
-  )(value);
+  const workflow = compose(
+    andThen(getAnimal),
+    otherwise(curry(handleError)),
+    fetchApi,
+    makeParams,
+    logger,
+    roundToInteger,
+    curry(parseFloat)
+  );
+
+  ifElse(isValidNumber, workflow, curriedHandleError("ValidationError"))(value);
 };
 
 export default processSequence;
