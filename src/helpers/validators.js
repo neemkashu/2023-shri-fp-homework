@@ -98,6 +98,9 @@ const isNotWhite = compose(not, isWhite);
 const greaterOrEqualTo3 = gte(__, 3);
 
 export const validateFieldN5 = compose(
+  lte(__, 1),
+  length,
+  uniq,
   greaterOrEqualTo3,
   objectSize,
   filter(isNotWhite)
