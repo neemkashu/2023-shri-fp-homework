@@ -37,8 +37,19 @@ export const validateFieldN5 = ({ star, square, triangle, circle }) => {
     return color !== "white";
   });
   if (nonWhite.length < 3) return false;
-  const unique = new Set(nonWhite);
-  return unique.size < 2;
+  const colors = {
+    green: 0,
+    blue: 0,
+    red: 0,
+    orange: 0,
+  };
+  nonWhite.forEach((color) => {
+    colors[color] += 1;
+  });
+  for (let color in colors) {
+    if (colors[color] >= 3) return true;
+  }
+  return false;
 };
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
