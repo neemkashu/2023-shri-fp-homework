@@ -33,12 +33,12 @@ export const validateFieldN4 = ({ star, square, triangle, circle }) => {
 
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
 export const validateFieldN5 = ({ star, square, triangle, circle }) => {
-  const nonWhite = [star, square, triangle, circle].filter(
-    (color) => color !== "white"
-  );
+  const nonWhite = [star, square, triangle, circle].filter((color) => {
+    return color !== "white";
+  });
   if (nonWhite.length < 3) return false;
-  const unique = new Set(...nonWhite).length;
-  return unique < 2;
+  const unique = new Set(nonWhite);
+  return unique.size < 2;
 };
 
 // 6. Ровно две зеленые фигуры (одна из зелёных – это треугольник), плюс одна красная. Четвёртая оставшаяся любого доступного цвета, но не нарушающая первые два условия
