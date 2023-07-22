@@ -55,7 +55,7 @@ import Api from "../tools/api";
 // C помощью API /animals.tech/id/name получить случайное животное используя полученный остаток в качестве id
 // Завершить цепочку вызовом handleSuccess в который в качестве аргумента положить результат полученный на предыдущем шаге
 
-const api = new Api({ errorCountdown: 1, ebableErrors: true });
+const api = new Api({ errorCountdown: 7, ebableErrors: true });
 const splitOnChars = split("");
 const amountOfChars = compose(length, splitOnChars);
 const isShorterThan10 = compose(lt(__, 10), amountOfChars);
@@ -95,8 +95,8 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   const logAndGiveNull = compose(always(null), curry(handleError));
 
   const getAnimal = compose(
-    andThen(handleEnd),
     otherwise(logAndGiveNull),
+    andThen(handleEnd),
     fetchAnimal,
     logger,
     remainderBy3,
@@ -108,8 +108,8 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   );
 
   const parseIdAndFetch = compose(
-    andThen(getAnimal),
     otherwise(logAndGiveNull),
+    andThen(getAnimal),
     fetchApi,
     makeParams,
     roundToInteger,
