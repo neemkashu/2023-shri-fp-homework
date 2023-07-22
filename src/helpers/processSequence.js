@@ -18,7 +18,6 @@ import {
   lte,
   not,
   otherwise,
-  partial,
   prop,
   split,
   tap,
@@ -56,7 +55,7 @@ import Api from "../tools/api";
 // C помощью API /animals.tech/id/name получить случайное животное используя полученный остаток в качестве id
 // Завершить цепочку вызовом handleSuccess в который в качестве аргумента положить результат полученный на предыдущем шаге
 
-const api = new Api();
+const api = new Api({ errorCountdown: 1, ebableErrors: true });
 const splitOnChars = split("");
 const amountOfChars = compose(length, splitOnChars);
 const isShorterThan10 = compose(lt(__, 10), amountOfChars);
@@ -89,12 +88,15 @@ const square = curry(Math.pow)(__, 2);
 const remainderBy3 = (x) => x % 3;
 
 const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
-  writeLog(value);
   const logger = tap(writeLog);
   const curriedHandleError = curryN(2, handleError);
+  const handleEnd = compose(handleSuccess, getConverted);
+
+  const logAndGiveNull = compose(always(null), curry(handleError));
+
   const getAnimal = compose(
-    andThen(compose(logger, getConverted)),
-    otherwise(curry(handleError)),
+    andThen(handleEnd),
+    otherwise(logAndGiveNull),
     fetchAnimal,
     logger,
     remainderBy3,
@@ -105,17 +107,22 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     getConverted
   );
 
-  const workflow = compose(
+  const parseIdAndFetch = compose(
     andThen(getAnimal),
-    otherwise(curry(handleError)),
+    otherwise(logAndGiveNull),
     fetchApi,
     makeParams,
-    logger,
     roundToInteger,
-    curry(parseFloat)
+    logger,
+    curry(parseFloat),
+    logger
   );
 
-  ifElse(isValidNumber, workflow, curriedHandleError("ValidationError"))(value);
+  ifElse(
+    isValidNumber,
+    parseIdAndFetch,
+    curriedHandleError("ValidationError")
+  )(value);
 };
 
 export default processSequence;
