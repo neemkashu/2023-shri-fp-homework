@@ -1,19 +1,18 @@
-/* eslint-disable no-unused-vars */
 import {
   __,
   allPass,
   compose,
   converge,
   count,
+  countBy,
   equals,
   filter,
   gte,
+  identity,
   keys,
   length,
-  lte,
   not,
   prop,
-  uniq,
   values,
 } from "ramda";
 import { COLORS, SHAPES } from "../constants";
@@ -90,13 +89,16 @@ export const validateFieldN4 = allPass([
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
 const isNotWhite = compose(not, isWhite);
 const greaterOrEqualTo3 = gte(__, 3);
+const sameColorsGraterThan3 = compose(
+  gte(__, 1),
+  objectSize,
+  filter(greaterOrEqualTo3),
+  countBy(identity),
+  values
+);
 
 export const validateFieldN5 = compose(
-  lte(__, 1),
-  length,
-  uniq,
-  greaterOrEqualTo3,
-  objectSize,
+  sameColorsGraterThan3,
   filter(isNotWhite)
 );
 
@@ -104,10 +106,7 @@ export const validateFieldN5 = compose(
 const is1 = equals(1);
 const is2 = equals(2);
 
-// const colorCount = (isColor) => compose(objectSize, filter(isColor));
-
 const twoGreenShapes = compose(is2, count(isGreen), values);
-// const twoGreenShapes = compose(is2, objectSize, filter(isGreen));
 const oneRedShape = compose(is1, objectSize, filter(isRed));
 
 export const validateFieldN6 = allPass([
