@@ -2,22 +2,18 @@
 import {
   __,
   allPass,
-  anyPass,
   compose,
   converge,
   count,
   equals,
   filter,
   gte,
-  juxt,
   keys,
   length,
   lte,
-  map,
   not,
   prop,
   uniq,
-  useWith,
   values,
 } from "ramda";
 import { COLORS, SHAPES } from "../constants";
@@ -50,12 +46,10 @@ const getTriangle = prop(SHAPES.TRIANGLE);
 const getStar = prop(SHAPES.STAR);
 
 const isCircleWhite = compose(isWhite, getCircle);
-const isCircleGreen = compose(isGreen, getCircle);
 const isSquareGreen = compose(isGreen, getSquare);
 const isTriangleWhite = compose(isWhite, getTriangle);
 const isTriangleGreen = compose(isGreen, getTriangle);
 const isStarRed = compose(isRed, getStar);
-const isStarGreen = compose(isGreen, getStar);
 
 // Фигуры на странице всегда в таком порядке: Circle Square Triangle Star
 // export const validateFieldN1 = ({star, square, triangle, circle}) => {
