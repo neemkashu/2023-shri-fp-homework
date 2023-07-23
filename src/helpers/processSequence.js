@@ -3,7 +3,9 @@ import {
   allPass,
   always,
   andThen,
+  apply,
   applySpec,
+  call,
   compose,
   concat,
   count,
@@ -12,6 +14,7 @@ import {
   equals,
   gt,
   head,
+  identity,
   ifElse,
   length,
   lt,
@@ -56,6 +59,14 @@ import Api from "../tools/api";
 // Завершить цепочку вызовом handleSuccess в который в качестве аргумента положить результат полученный на предыдущем шаге
 
 const api = new Api({ errorCountdown: 7, ebableErrors: true });
+
+const consoler = tap(console.log);
+
+const getValue = prop("value");
+const getWriteLog = prop("writeLog");
+const getHandleSuccess = prop("handleSuccess");
+const getHandleError = prop("handleError");
+
 const splitOnChars = split("");
 const amountOfChars = compose(length, splitOnChars);
 const isShorterThan10 = compose(lt(__, 10), amountOfChars);
@@ -65,16 +76,19 @@ const isNotNegative = compose(not, isMinus, head);
 const isDot = equals(".");
 const isLonlyDot = compose(lte(__, 1), count(isDot), splitOnChars);
 const isDigitsAndDot = test(/^[0-9.]+$/);
-const isValidNumber = allPass([
-  isShorterThan10,
-  isLongerThan2,
-  isNotNegative,
-  isLonlyDot,
-  isDigitsAndDot,
-]);
+const isValidNumber = compose(
+  allPass([
+    isShorterThan10,
+    isLongerThan2,
+    isNotNegative,
+    isLonlyDot,
+    isDigitsAndDot,
+  ]),
+  getValue
+);
 const roundToInteger = curry(Math.round);
 const makeParams = applySpec({
-  number: (x) => x,
+  number: identity,
   from: always(10),
   to: always(2),
 });
@@ -89,7 +103,6 @@ const remainderBy3 = (x) => x % 3;
 
 const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   const logger = tap(writeLog);
-  const curriedHandleError = curryN(2, handleError);
   const handleEnd = compose(handleSuccess, getConverted);
 
   const logAndGiveNull = compose(always(null), curry(handleError));
@@ -112,8 +125,8 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
     andThen(getAnimal),
     fetchApi,
     makeParams,
-    roundToInteger,
     logger,
+    roundToInteger,
     curry(parseFloat),
     logger
   );
@@ -121,8 +134,8 @@ const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
   ifElse(
     isValidNumber,
     parseIdAndFetch,
-    curriedHandleError("ValidationError")
-  )(value);
+    compose(apply(__, ["ValidationError"]), curry, getHandleError)
+  )({ value, writeLog, handleSuccess, handleError });
 };
 
 export default processSequence;
