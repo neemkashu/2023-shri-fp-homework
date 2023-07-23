@@ -29,6 +29,7 @@ import {
   test,
   toString,
   lensProp,
+  clone,
 } from "ramda";
 import Api from "../tools/api";
 
@@ -105,7 +106,8 @@ const makeParams = changeValue(
 );
 
 const fetchApi = api.get("https://api.tech/numbers/base");
-const fulfillPromiseWithExtraFields = (fetch, obj, paramKey = "value") => {
+const fulfillPromiseWithExtraFields = (fetch, objInput, paramKey = "value") => {
+  const obj = clone(objInput);
   return fetch(obj[paramKey])
     .then((value) => {
       obj[paramKey] = value;
