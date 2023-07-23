@@ -11,7 +11,6 @@ import {
   converge,
   count,
   curry,
-  curryN,
   equals,
   gt,
   head,
@@ -29,11 +28,9 @@ import {
   tap,
   test,
   toString,
+  lensProp,
 } from "ramda";
 import Api from "../tools/api";
-import { lensProp } from "ramda";
-import { useWith } from "ramda";
-import { mergeAll } from "ramda";
 
 /**
  * @file Домашка по FP ч. 2
@@ -126,7 +123,6 @@ const fetchAnimal = compose(api.get(__, {}), animalUrl, toString);
 const fetchAnimalWithExtraFields = curry(fulfillPromiseWithExtraFields)(
   fetchAnimal
 );
-const getConverted = prop("result");
 const size = prop("length");
 const square = curry(Math.pow)(__, 2);
 const remainderBy3 = mathMod(__, 3);
@@ -157,7 +153,7 @@ const getAnimal = compose(
   logger,
   changeValue(size),
   logger,
-  changeValue(getConverted)
+  changeValue(getResult)
 );
 
 const parseIdAndFetch = compose(
