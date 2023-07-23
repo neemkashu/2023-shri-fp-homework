@@ -65,7 +65,8 @@ import { mergeAll } from "ramda";
 // C помощью API /animals.tech/id/name получить случайное животное используя полученный остаток в качестве id
 // Завершить цепочку вызовом handleSuccess в который в качестве аргумента положить результат полученный на предыдущем шаге
 
-const api = new Api({ errorCountdown: 1, ebableErrors: true });
+// const api = new Api({ errorCountdown: 1, ebableErrors: true });
+const api = new Api({ errorCountdown: 7, ebableErrors: true });
 
 // const consoler = tap(console.log);
 
