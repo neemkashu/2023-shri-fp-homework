@@ -8,6 +8,7 @@ import {
   call,
   compose,
   concat,
+  converge,
   count,
   curry,
   curryN,
@@ -19,14 +20,20 @@ import {
   length,
   lt,
   lte,
+  mathMod,
   not,
   otherwise,
+  over,
   prop,
   split,
   tap,
   test,
+  toString,
 } from "ramda";
 import Api from "../tools/api";
+import { lensProp } from "ramda";
+import { useWith } from "ramda";
+import { mergeAll } from "ramda";
 
 /**
  * @file Домашка по FP ч. 2
@@ -58,11 +65,12 @@ import Api from "../tools/api";
 // C помощью API /animals.tech/id/name получить случайное животное используя полученный остаток в качестве id
 // Завершить цепочку вызовом handleSuccess в который в качестве аргумента положить результат полученный на предыдущем шаге
 
-const api = new Api({ errorCountdown: 7, ebableErrors: true });
+const api = new Api({ errorCountdown: 1, ebableErrors: true });
 
-const consoler = tap(console.log);
+// const consoler = tap(console.log);
 
 const getValue = prop("value");
+const getResult = prop("result");
 const getWriteLog = prop("writeLog");
 const getHandleSuccess = prop("handleSuccess");
 const getHandleError = prop("handleError");
@@ -86,56 +94,81 @@ const isValidNumber = compose(
   ]),
   getValue
 );
+
+const changeValue = over(lensProp("value"));
+
 const roundToInteger = curry(Math.round);
-const makeParams = applySpec({
-  number: identity,
-  from: always(10),
-  to: always(2),
-});
-const toString = (x) => `${x}`;
+const makeParams = changeValue(
+  applySpec({
+    number: identity,
+    from: always(10),
+    to: always(2),
+  })
+);
+
 const fetchApi = api.get("https://api.tech/numbers/base");
+const fulfillPromiseWithExtraFields = (fetch, obj, paramKey = "value") => {
+  return fetch(obj[paramKey])
+    .then((value) => {
+      obj[paramKey] = value;
+      return obj;
+    })
+    .catch((reason) => {
+      obj[paramKey] = reason;
+      return Promise.reject(obj);
+    });
+};
+const fetchNumber = curry(fulfillPromiseWithExtraFields)(fetchApi);
+
 const animalUrl = concat("https://animals.tech/");
 const fetchAnimal = compose(api.get(__, {}), animalUrl, toString);
+const fetchAnimalWithExtraFields = curry(fulfillPromiseWithExtraFields)(
+  fetchAnimal
+);
 const getConverted = prop("result");
 const size = prop("length");
 const square = curry(Math.pow)(__, 2);
-const remainderBy3 = (x) => x % 3;
+const remainderBy3 = mathMod(__, 3);
+const validationError = compose(
+  apply(__, ["ValidationError"]),
+  curry,
+  getHandleError
+);
+const logger = tap(converge(call, [compose(curry, getWriteLog), getValue]));
+const errorLogger = tap(
+  converge(call, [compose(curry, getHandleError), getValue])
+);
+const successLogger = tap(
+  converge(call, [
+    compose(curry, getHandleSuccess),
+    compose(getResult, getValue),
+  ])
+);
+const roundFromString = changeValue(compose(roundToInteger, curry(parseFloat)));
 
-const processSequence = ({ value, writeLog, handleSuccess, handleError }) => {
-  const logger = tap(writeLog);
-  const handleEnd = compose(handleSuccess, getConverted);
+const getAnimal = compose(
+  otherwise(errorLogger),
+  andThen(successLogger),
+  fetchAnimalWithExtraFields,
+  logger,
+  changeValue(remainderBy3),
+  changeValue(square),
+  logger,
+  changeValue(size),
+  logger,
+  changeValue(getConverted)
+);
 
-  const logAndGiveNull = compose(always(null), curry(handleError));
+const parseIdAndFetch = compose(
+  otherwise(errorLogger),
+  andThen(getAnimal),
+  fetchNumber,
+  makeParams,
+  logger,
+  roundFromString,
+  logger
+);
 
-  const getAnimal = compose(
-    otherwise(logAndGiveNull),
-    andThen(handleEnd),
-    fetchAnimal,
-    logger,
-    remainderBy3,
-    square,
-    logger,
-    size,
-    logger,
-    getConverted
-  );
-
-  const parseIdAndFetch = compose(
-    otherwise(logAndGiveNull),
-    andThen(getAnimal),
-    fetchApi,
-    makeParams,
-    logger,
-    roundToInteger,
-    curry(parseFloat),
-    logger
-  );
-
-  ifElse(
-    isValidNumber,
-    parseIdAndFetch,
-    compose(apply(__, ["ValidationError"]), curry, getHandleError)
-  )({ value, writeLog, handleSuccess, handleError });
-};
+const processSequence = ifElse(isValidNumber, parseIdAndFetch, validationError);
 
 export default processSequence;
