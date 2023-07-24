@@ -151,6 +151,7 @@ const getAnimal = compose(
   fetchAnimalWithExtraFields,
   logger,
   changeValue(remainderBy3),
+  logger,
   changeValue(square),
   logger,
   changeValue(size),
